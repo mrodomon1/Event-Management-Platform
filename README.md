@@ -1,83 +1,59 @@
-# Eventora - Full-Stack Event Booking Platform
+# Event Management Platform (MERN)
 
-Eventora is a full-stack MERN application that allows users to seamlessly browse, register, and pay natively without any third party tools. It features an administrative dashboard for event organizers to create and manage free and paid events. All bookings can be managed manually by an admin to handle payments directly.
+A modern, full-stack event ticketing platform built with the MERN stack (MongoDB, Express, React, Node.js). This platform allows users to seamlessly browse, register, and pay for events using Razorpay. It features a comprehensive administrative dashboard for event organizers to create and manage both free and paid events.
 
-## Features
+## 🚀 Key Features
+
 - **User Authentication**: Secure login & registration with JWT and bcrypt.
-- **2FA OTP Verification**: 
-  - Mandatory Email OTP to activate your account upon Registration (or delayed login attempts).
-  - Mandatory Email OTP to finalize and secure event ticket booking.
-- **Role-Based Access**: 
-  - **Admin**: Create, edit, and delete events. Confirm and reject all incoming booking requests, mark them as 'Paid' or 'Not Paid'. Access is strictly locked to database-flagged users only.
-  - **User**: Browse events, submit ticket booking requests via OTP, view personal dashboard pending status, and cancel bookings.
-- **Event Management**: Create free and paid events with detailed descriptions, external image URLs, dates, categories, and seating capacity.
-- **Smart Booking System**:
-  - Mandatory 2FA OTP to authorize a booking request.
-  - All booking requests (both free and paid) enter a secure 'Pending' queue for Admin verification.
-  - Seat availability accurately updates and securely validates against overbooking logic.
-- **Admin Analytics Dashboard**: Track live data such as Pending Requests, Total Revenue, and Total Confirmed Paid Clients directly from the admin panel.
-- **Email Notifications**: Automated email delivery upon successful booking confirmation using Nodemailer.
+- **Two-Factor OTP Verification**: 
+  - Mandatory Email OTP to activate your account upon registration.
+  - Mandatory Email OTP to authorize and secure event ticket booking.
+- **Payment Gateway Integration (Razorpay)**:
+  - Seamless checkout flow for paid events.
+  - "Abandoned Cart" tracking (Failed payments remain in 'Pending' state for follow-up).
+- **Role-Based Access Control**: 
+  - **Admin**: Create, edit, and delete events. View revenue analytics, confirm pending bookings, and track paid clients.
+  - **User**: Browse events, submit booking requests, complete payments, and view personal dashboard.
+- **Event Management**: Create events with detailed descriptions, images, dates, categories, and seating capacity limits.
+- **Automated Emails**: Real-time email delivery upon successful booking confirmation and OTP requests using Nodemailer.
 - **Sleek UI/UX**: Built entirely with React, Tailwind CSS, and polished with micro-interactions.
 
 ---
 
-## 🚀 Setup Instructions
+## 💻 Tech Stack
+- **Frontend**: React.js, Vite, Tailwind CSS, Axios
+- **Backend**: Node.js, Express.js
+- **Database**: MongoDB (Mongoose)
+- **Authentication**: JSON Web Tokens (JWT), Bcrypt.js
+- **Payments**: Razorpay API
+- **Mailing**: Nodemailer
 
-### Prerequisites
-Make sure you have [Node.js](https://nodejs.org/) installed on your machine.
-You will also need a MongoDB database (e.g., [MongoDB Atlas Free Tier](https://www.mongodb.com/cloud/atlas/register)).
+---
+
+## 🛠️ Setup Instructions
 
 ### 1. Environment Variables Configuration
-Navigate to `server/.env` and fill in the necessary keys:
+Create a `.env` file inside the `server/` folder and fill in the necessary keys:
 ```env
 MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=supersecretjwtkey_eventora
+JWT_SECRET=your_jwt_secret
 EMAIL_USER=your_gmail_address
 EMAIL_PASS=your_gmail_app_password
 PORT=5000
-```
-> **Note**: For `EMAIL_PASS`, you need to generate an "App Password" from your Google Account settings, standard passwords won't work due to 2FA.
-
-### 2. Run from Outer Folder (Single Terminal)
-You can now manage both backend and frontend from the project root:
-
-```bash
-# from Eventora root
-npm install
-npm run install:all
-npm run dev
+RAZORPAY_KEY_ID=your_razorpay_test_id
+RAZORPAY_KEY_SECRET=your_razorpay_test_secret
 ```
 
-- `npm run dev` starts both `server` and `client` together using `concurrently`.
-- `npm run dev:all` installs dependencies (server + client) and starts both in one command.
-- `npm run start` runs backend `start` + frontend `preview` together.
-
-### 3. Install Dependencies
-Open two separate terminals for the backend and frontend.
-
-**Backend Terminal:**
+### 2. Install Dependencies
+Open a terminal in the root folder and run:
 ```bash
-cd server
-npm install --legacy-peer-deps
-```
-
-**Frontend Terminal:**
-```bash
-cd client
 npm install
 ```
 
-### 4. Run the Application Local Servers
-**Run Backend:**
+### 3. Run the Application (Concurrently)
+You can start both the backend server and frontend Vite server together with a single command:
 ```bash
-cd server
 npm run dev
 ```
-*(Server will run on `http://localhost:5000`)*
-
-**Run Frontend:**
-```bash
-cd client
-npm run dev
-```
-*(Client will run on a local port provided by Vite, typically `http://localhost:5173`)*
+- Backend will run on `http://localhost:5000`
+- Frontend will run on `http://localhost:5173` (or 5174)
