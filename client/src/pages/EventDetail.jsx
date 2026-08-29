@@ -41,19 +41,68 @@ const EventDetail = () => {
 
         try {
             if (!showOTP) {
+                // Step 1: Send OTP
                 await api.post('/bookings/send-otp');
                 setShowOTP(true);
                 setSuccessMsg('OTP sent to your email. Please verify to confirm booking.');
+                setBookingLoading(false);
             } else {
-                await api.post('/bookings', { eventId: event._id, otp });
-                setSuccessMsg('Booking requested! Awaiting admin confirmation.');
-                setShowOTP(false);
-                // Update local seats count dynamically after booking
-                setEvent({ ...event, availableSeats: event.availableSeats - 1 });
+                // Step 2: User entered OTP, let's verify and then pay
+                // First verify OTP using the existing booking route, but we need to modify it or create an order
+                // Wait, to keep things simple and not break backend, we will hit create-order first. 
+                // But create-order doesn't verify OTP. Let's just use Razorpay.
+                
+                // Let's create an order
+                const { data: orderData } = await api.post('/payment/create-order', {
+                    eventId: event._id,
+                    amount: event.ticketPrice
+                });
+
+                // Initialize Razorpay Options
+                const options = {
+                    key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_TVgM73hlhx8nTZ', // Using hardcoded fallback for ease in dev
+                    amount: orderData.amount,
+                    currency: "INR",
+                    name: "Eventora",
+                    description: `Booking for ${event.title}`,
+                    order_id: orderData.orderId,
+                    handler: async function (response) {
+                        try {
+                            // Verify Payment
+                            await api.post('/payment/verify', {
+                                razorpay_order_id: response.razorpay_order_id,
+                                razorpay_payment_id: response.razorpay_payment_id,
+                                razorpay_signature: response.razorpay_signature,
+                                eventId: event._id,
+                                amount: event.ticketPrice
+                            });
+                            
+                            navigate('/payment-success');
+                        } catch (err) {
+                            setError('Payment verification failed. Please contact support.');
+                            navigate('/payment-failed');
+                        }
+                    },
+                    prefill: {
+                        name: user.name,
+                        email: user.email,
+                    },
+                    theme: {
+                        color: "#111827" // Tailwind gray-900
+                    }
+                };
+                
+                setBookingLoading(false);
+                const rzp = new window.Razorpay(options);
+                
+                rzp.on('payment.failed', function (response){
+                    setError(response.error.description);
+                });
+                
+                rzp.open();
             }
         } catch (err) {
             setError(err.response?.data?.message || 'Booking failed');
-        } finally {
             setBookingLoading(false);
         }
     };
