@@ -23,6 +23,22 @@ exports.createOrder = async (req, res) => {
             return res.status(400).json({ message: 'Event is fully booked' });
         }
 
+        // Bypassing Razorpay for Free Events (amount is 0)
+        if (amount === 0) {
+            const booking = await Booking.create({
+                userId: req.user.id,
+                eventId: eventId,
+                status: 'confirmed',
+                paymentStatus: 'paid',
+                amount: 0,
+                razorpayOrderId: `free_${Date.now()}`
+            });
+            event.availableSeats -= 1;
+            await event.save();
+            await sendBookingEmail(req.user.email, req.user.name, event.title);
+            return res.status(200).json({ isFree: true, booking });
+        }
+
         const options = {
             amount: amount * 100, // Amount in paise
             currency: 'INR',

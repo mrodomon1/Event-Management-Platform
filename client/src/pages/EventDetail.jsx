@@ -58,6 +58,12 @@ const EventDetail = () => {
                     amount: event.ticketPrice
                 });
 
+                if (orderData.isFree) {
+                    navigate('/payment-success');
+                    setBookingLoading(false);
+                    return;
+                }
+
                 // Initialize Razorpay Options
                 const options = {
                     key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_TVgM73hlhx8nTZ', // Using hardcoded fallback for ease in dev
